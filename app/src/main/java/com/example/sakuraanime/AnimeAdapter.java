@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 public class AnimeAdapter extends RecyclerView.Adapter<AnimeAdapter.ViewHolder> {
     private List<Anime> mAnimeList;
     private Dialog mDialog;
+    private Thread threrad;
 
     static class ViewHolder extends RecyclerView.ViewHolder{
         View animeView;
@@ -62,32 +63,44 @@ public class AnimeAdapter extends RecyclerView.Adapter<AnimeAdapter.ViewHolder> 
         holder.animeView.setOnClickListener(new View.OnClickListener(){
             @Override
                     public void onClick(View view){
-                mDialog = DialogThridUtils.showWaitDialog(view.getContext(), "加载中...", false, true);
+
+
+                mDialog = DialogThridUtils.showWaitDialog(view.getContext(), "加载中", true, true);
                 Toast.makeText(view.getContext(),"加载中，请稍候",Toast.LENGTH_LONG).show();
-                int position = holder.getAbsoluteAdapterPosition();
-                Anime anime = mAnimeList.get(position);
-                String playUrl = anime.getEpisodeList().get(0).getEpisodeUrl().entrySet().iterator().next().getValue();
-                String title = anime.getEpisodeList().get(0).getEpisodeUrl().entrySet().iterator().next().getKey();
-                String finalUrl ="";
-                try{
-                    finalUrl = getFinalUrl(playUrl);
-                    if(finalUrl.equals("")){
-                        Toast.makeText(view.getContext(),"加载异常，请换源",Toast.LENGTH_SHORT).show();
-                    }else {
-                        Intent intent = new Intent();
-                        Bundle data = new Bundle();
-                        data.putString("finalUrl",finalUrl);
-                        data.putString("title",title);
-                        intent.putExtras(data);
-                        intent.setClass(view.getContext(),WatchActivity.class);
-                        DialogThridUtils.closeDialog(mDialog);
-                        view.getContext().startActivity(intent);
+                threrad = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+
+                            int position = holder.getAbsoluteAdapterPosition();
+                            Anime anime = mAnimeList.get(position);
+                            String playUrl = anime.getEpisodeList().get(0).getEpisodeUrl().entrySet().iterator().next().getValue();
+                            String title = anime.getEpisodeList().get(0).getEpisodeUrl().entrySet().iterator().next().getKey();
+                            String finalUrl ="";
+                            try{
+                                finalUrl = getFinalUrl(playUrl);
+                                if(finalUrl.equals("")){
+                                    Toast.makeText(view.getContext(),"加载异常，请换源",Toast.LENGTH_SHORT).show();
+                                }else {
+                                    Intent intent = new Intent();
+                                    Bundle data = new Bundle();
+                                    data.putString("finalUrl",finalUrl);
+                                    data.putString("title",title);
+                                    intent.putExtras(data);
+                                    intent.setClass(view.getContext(),WatchActivity.class);
+                                    DialogThridUtils.closeDialog(mDialog);
+                                    view.getContext().startActivity(intent);
+                                }
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
                     }
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-
-
+                });
+                threrad.start();
             }
         });
         return holder;

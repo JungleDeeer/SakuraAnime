@@ -68,6 +68,8 @@ public class WatchActivity extends AppCompatActivity {
         Jzvd.releaseAllVideos();
     }
 
+
+
     public static String getFinalUrl(String playUrl)throws FailingHttpStatusCodeException, MalformedURLException, IOException {
         LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log","org.apache.commons.logging.impl.NoOpLog");
         java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
