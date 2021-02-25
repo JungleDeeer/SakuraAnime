@@ -66,26 +66,25 @@ public class AnimeAdapter extends RecyclerView.Adapter<AnimeAdapter.ViewHolder> 
 
 
                 mDialog = DialogThridUtils.showWaitDialog(view.getContext(), "加载中", true, true);
-                Toast.makeText(view.getContext(),"加载中，请稍候",Toast.LENGTH_LONG).show();
+//                Toast.makeText(view.getContext(),"加载中，请稍候",Toast.LENGTH_LONG).show();
                 threrad = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        try{
-
-                            int position = holder.getAbsoluteAdapterPosition();
-                            Anime anime = mAnimeList.get(position);
-                            String playUrl = anime.getEpisodeList().get(0).getEpisodeUrl().entrySet().iterator().next().getValue();
-                            String title = anime.getEpisodeList().get(0).getEpisodeUrl().entrySet().iterator().next().getKey();
-                            String finalUrl ="";
                             try{
+                                int position = holder.getAbsoluteAdapterPosition();
+                                ArrayList<Episode> episodeList = mAnimeList.get(position).getEpisodeList();
+                                String playUrl = episodeList.get(0).getEpisodeUrl().entrySet().iterator().next().getValue();
+                                String title = episodeList.get(0).getEpisodeUrl().entrySet().iterator().next().getKey();
+                                String finalUrl ="";
                                 finalUrl = getFinalUrl(playUrl);
-                                if(finalUrl.equals("")){
+                                if(finalUrl == null || finalUrl.equals("")){
                                     Toast.makeText(view.getContext(),"加载异常，请换源",Toast.LENGTH_SHORT).show();
                                 }else {
                                     Intent intent = new Intent();
                                     Bundle data = new Bundle();
                                     data.putString("finalUrl",finalUrl);
                                     data.putString("title",title);
+                                    data.putSerializable("EpisodeList",episodeList);
                                     intent.putExtras(data);
                                     intent.setClass(view.getContext(),WatchActivity.class);
                                     DialogThridUtils.closeDialog(mDialog);
@@ -95,9 +94,6 @@ public class AnimeAdapter extends RecyclerView.Adapter<AnimeAdapter.ViewHolder> 
                                 e.printStackTrace();
                             }
 
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
                     }
                 });
                 threrad.start();

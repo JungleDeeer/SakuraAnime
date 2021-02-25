@@ -10,7 +10,7 @@ public class Anime implements Serializable {
     private String alias;
     private String info;
     private String content;
-    private List<Episode> episodeList = new ArrayList<>();
+    private ArrayList<Episode> episodeList = new ArrayList<Episode>();
 
     public void setName(String name) {
         this.name = name;
@@ -32,11 +32,11 @@ public class Anime implements Serializable {
         this.content = content;
     }
 
-    public List<Episode> getEpisodeList() {
+    public ArrayList<Episode> getEpisodeList() {
         return episodeList;
     }
 
-    public void setEpisodeList(List<Episode> episodeList) {
+    public void setEpisodeList(ArrayList<Episode> episodeList) {
         this.episodeList = episodeList;
     }
 

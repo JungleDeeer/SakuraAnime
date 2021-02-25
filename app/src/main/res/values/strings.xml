@@ -1,3 +1,19 @@
 <resources>
+    <string-array name="sections">
+        <item>@string/section_live</item>
+        <item>@string/section_recommend</item>
+        <item>@string/section_bangumi</item>
+        <item>@string/section_more</item>
+        <item>@string/section_focus</item>
+        <item>@string/section_discover</item>
+    </string-array>
+    <string name="section_recommend">推荐</string>
+    <string name="section_live">直播</string>
+    <string name="section_focus">关注</string>
+    <string name="section_more">分区</string>
+    <string name="section_bangumi">番剧</string>
+    <string name="section_discover">发现</string>
+    <string name="selection">选集</string>
+
     <string name="app_name">SakuraAnime</string>
 </resources>
