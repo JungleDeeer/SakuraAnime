@@ -3,6 +3,7 @@ package com.example.sakuraanime;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -41,37 +43,39 @@ public class WatchActivity extends AppCompatActivity {
     int playingSource;
     String finalUrl;
     JzvdStd jzvdStd;
+    String barTitle;
     String title;
     List<String> episodeName = new ArrayList<>();
     List<String> episodePlayUrl = new ArrayList<>();
     Map<String,String> episodeUrl;
     ArrayList<Episode> episodeList = new ArrayList<Episode>();
     EpisodeListAdapter episodeListAdapter;
+    private RecyclerView episodeListRecyclerView;
+    private RecyclerView sourceRecyclerView;
+    private androidx.appcompat.app.ActionBar actionBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_watch);
 
-//        String playUrl = anime.getEpisodeList().get(0).getEpisodeUrl().entrySet().iterator().next().getValue();
-//        String title = anime.getEpisodeList().get(0).getEpisodeUrl().entrySet().iterator().next().getKey();
+
         jzvdStd = (JzvdStd) findViewById(R.id.jz_video);
-//        jzvdStd.setUp("https://gss3.baidu.com/6LZ0ej3k1Qd3ote6lo7D0j9wehsv/tieba-smallvideo/60_10b466747b9ae5fd5b8cfe3308f460bc.mp4"
-//                , "女高中生虚度日常");
-//        String finalUrl ="";
+
         Bundle data = getIntent().getExtras();
         finalUrl = data.getString("finalUrl");
         title = data.getString("title");
-//        try{
-//            finalUrl = getFinalUrl(playUrl);
-//            if(finalUrl.equals("")){
-//                Toast.makeText(this,"加载异常，请换源",Toast.LENGTH_SHORT).show();
-//            }
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
+        barTitle = data.getString("barTitle");
+
+        actionBar = getSupportActionBar();
+        if(actionBar != null){
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(barTitle);
+        }
+
         jzvdStd.setUp(finalUrl, title, JzvdStd.SCREEN_NORMAL);
-        jzvdStd.posterImageView.setImageResource(R.drawable.a1);
+        jzvdStd.posterImageView.setImageResource(R.drawable.paimeng);
 
         episodeList = (ArrayList<Episode>)getIntent().getSerializableExtra("EpisodeList");
         int playingSource = 0;
@@ -82,15 +86,21 @@ public class WatchActivity extends AppCompatActivity {
         }
 
 
-        RecyclerView sourceRecyclerView = findViewById(R.id.episode_source_recycler);
+        sourceRecyclerView = findViewById(R.id.episode_source_recycler);
         LinearLayoutManager sourceLayoutManager = new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL, false);
         sourceRecyclerView.setLayoutManager(sourceLayoutManager);
         SourceAdapter sourceAdapter = new SourceAdapter(episodeList,title,this);
         sourceRecyclerView.setAdapter(sourceAdapter);
 
-        RecyclerView episodeListRecyclerView = findViewById(R.id.episode_list_recycler);
-        LinearLayoutManager episodeListLayoutManager = new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false);
-        episodeListRecyclerView.setLayoutManager(episodeListLayoutManager);
+        episodeListRecyclerView = findViewById(R.id.episode_list_recycler);
+        if(episodeUrl.size()<14){
+            LinearLayoutManager episodeListLayoutManager = new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false);
+            episodeListRecyclerView.setLayoutManager(episodeListLayoutManager);
+        }else {
+            GridLayoutManager episodeGridLayoutManager = new GridLayoutManager(this,4,GridLayoutManager.HORIZONTAL,false);
+            episodeListRecyclerView.setLayoutManager(episodeGridLayoutManager);
+        }
+
         episodeListAdapter = new EpisodeListAdapter(episodeName,episodePlayUrl,this);
         episodeListRecyclerView.setAdapter(episodeListAdapter);
 
@@ -99,6 +109,9 @@ public class WatchActivity extends AppCompatActivity {
                 new IntentFilter("source-change"));
         LocalBroadcastManager.getInstance(this).registerReceiver(episodeMessageReceiver,
                 new IntentFilter("episode-change"));
+        if(finalUrl.equals("")){
+            Toast.makeText(WatchActivity.this,"该集异常，请换源or换集",Toast.LENGTH_SHORT).show();
+        }
 
     }
 
@@ -116,7 +129,7 @@ public class WatchActivity extends AppCompatActivity {
                     else {
                         finalUrl = newUrl;
                         jzvdStd.setUp(finalUrl, title, JzvdStd.SCREEN_NORMAL);
-                        jzvdStd.posterImageView.setImageResource(R.drawable.a1);
+                        jzvdStd.posterImageView.setImageResource(R.drawable.paimeng);
 
                         episodeUrl= episodeList.get(playingSource).getEpisodeUrl();
                         episodeName.clear();
@@ -124,6 +137,14 @@ public class WatchActivity extends AppCompatActivity {
                         for(Map.Entry<String,String> entry : episodeUrl.entrySet()){
                             episodeName.add(entry.getKey());
                             episodePlayUrl.add(entry.getValue());
+                        }
+                        if(episodeUrl.size()<13){
+                            LinearLayoutManager episodeListLayoutManager = new LinearLayoutManager(WatchActivity.this,LinearLayoutManager.HORIZONTAL,false);
+                            episodeListRecyclerView.setLayoutManager(episodeListLayoutManager);
+                        }else {
+                            GridLayoutManager episodeGridLayoutManager = new GridLayoutManager(WatchActivity.this,4);
+                            episodeGridLayoutManager.setOrientation(GridLayoutManager.VERTICAL);
+                            episodeListRecyclerView.setLayoutManager(episodeGridLayoutManager);
                         }
 
                         episodeListAdapter.notifyDataSetChanged();
@@ -144,7 +165,7 @@ public class WatchActivity extends AppCompatActivity {
             }else {
                 finalUrl = newUrl;
                 jzvdStd.setUp(finalUrl, title, JzvdStd.SCREEN_NORMAL);
-                jzvdStd.posterImageView.setImageResource(R.drawable.a1);
+                jzvdStd.posterImageView.setImageResource(R.drawable.paimeng);
                 Toast.makeText(WatchActivity.this,"换集成功",Toast.LENGTH_SHORT).show();
             }
         }
@@ -198,8 +219,15 @@ public class WatchActivity extends AppCompatActivity {
         }else{
             return "";
         }
+    }
 
-//        String finalUrl = doc.select("div[class=dplayer-video-wrap]").select("video").attr("src");
-
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                this.finish(); // back button
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -8,38 +8,83 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:orientation="horizontal"
-        >
-        <TextView
-            android:layout_width="90dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:textSize="18sp"
-            android:text="想看啥："/>
-        <EditText
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical"
-            android:imeOptions="actionSearch"
-            android:id="@+id/search"/>
-
-    </LinearLayout>
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/logo_ll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center">
-        <Button
-            android:id="@+id/search_button"
+        android:layout_marginTop="0dp">
+
+        <ImageView
+            android:id="@+id/iv_icon_left"
             android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:background="@drawable/button"
-            android:gravity="center"
-            android:text="搜索" />
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/ic_22" />
+
+
+        <ImageView
+            android:id="@+id/iv_icon_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_33" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/main_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/default_general_margin"
+        android:layout_marginStart="@dimen/default_general_margin"
+        android:layout_marginTop="@dimen/default_grow_margin"
+        android:background="@drawable/login_input_rounded_bg"
+        android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/action_bar_default_height"
+        android:gravity="center_vertical">
+
+        <EditText
+            android:id="@+id/word_search"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginStart="@dimen/default_general_margin"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:drawablePadding="@dimen/default_general_margin"
+            android:ellipsize="start"
+            android:hint="请输入搜索关键词"
+            android:inputType="textVisiblePassword"
+            android:textColor="@color/black_80"
+            android:textColorHint="@color/gray_20"
+            android:textSize="@dimen/default_medium_text_size"
+            android:singleLine="true" />
+
+        <ImageButton
+            android:id="@+id/delete_search"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:paddingEnd="@dimen/default_general_margin"
+            android:paddingStart="@dimen/default_grow_margin"
+            android:src="@drawable/ic_edittext_clear"
+            android:visibility="gone" />
     </LinearLayout>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_search"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/login_button_height"
+        android:layout_marginBottom="@dimen/default_general_margin"
+        android:layout_marginLeft="@dimen/default_general_margin"
+        android:layout_marginRight="@dimen/default_general_margin"
+        android:layout_marginTop="@dimen/default_long_margin"
+        android:background="@drawable/corner_btn"
+        android:gravity="center"
+        android:text="搜索"
+        android:textColor="@color/white"
+        android:textSize="@dimen/default_medium_text_size" />
 
 </LinearLayout>
