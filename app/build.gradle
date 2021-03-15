@@ -60,5 +60,9 @@ dependencies {
     implementation 'com.wuxiaolong.pullloadmorerecyclerview:library:1.1.2'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
     implementation 'com.orhanobut:logger:2.2.0'
+    implementation 'com.sun.mail:android-mail:1.5.5'
+    implementation 'com.sun.mail:android-activation:1.5.5'
+    implementation 'com.github.xuexiangjys:XUpdate:2.0.7'
+
 
 }

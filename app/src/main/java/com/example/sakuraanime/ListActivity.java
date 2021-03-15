@@ -1,37 +1,25 @@
 package com.example.sakuraanime;
 
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.wuxiaolong.pullloadmorerecyclerview.PullLoadMoreRecyclerView;
 
 import org.jsoup.Jsoup;
@@ -42,8 +30,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import cn.jzvd.JzvdStd;
 
 import static android.content.ContentValues.TAG;
 
@@ -130,6 +116,9 @@ public class ListActivity extends AppCompatActivity {
         mPullLoadMoreRecyclerView.setFooterViewText("loading");
         mPullLoadMoreRecyclerView.setLinearLayout();
 
+        if(amount<=10){
+            mPullLoadMoreRecyclerView.setPushRefreshEnable(false);
+        }
         mPullLoadMoreRecyclerView.setOnPullLoadMoreListener(new PullLoadMoreRecyclerView.PullLoadMoreListener() {
             @Override
             public void onRefresh() {
@@ -138,7 +127,15 @@ public class ListActivity extends AppCompatActivity {
 
             @Override
             public void onLoadMore() {
-                new getDataThread().start();
+                if(animeList.size()>=amount){
+                    Toast.makeText(ListActivity.this,"没啦没啦",Toast.LENGTH_LONG).show();
+                    mPullLoadMoreRecyclerView.setPushRefreshEnable(false);
+                    mPullLoadMoreRecyclerView.setPullLoadMoreCompleted();
+                    return;
+                }else {
+                    new getDataThread().start();
+                }
+
             }
         });
         animeAdapter = new AnimeAdapter(animeList);
@@ -262,12 +259,6 @@ public class ListActivity extends AppCompatActivity {
         public void run(){
             super.run();
 
-            if(animeList.size()>=amount){
-                Toast.makeText(ListActivity.this,"没啦没啦",Toast.LENGTH_LONG);
-                mPullLoadMoreRecyclerView.setPullLoadMoreCompleted();
-                return;
-            }
-
             try {
                 lastLoad = animeList.size();
                 page = page + 1;
@@ -301,6 +292,9 @@ public class ListActivity extends AppCompatActivity {
             Message msg = Message.obtain();
             msg.arg1 = 1;
             getDataHandler.sendMessage(msg);
+            if(animeList.size()>=amount){
+                mPullLoadMoreRecyclerView.setPushRefreshEnable(false);
+            }
             Log.d(TAG, "run: my getData msg sent");
         }
     }

@@ -2,16 +2,11 @@ package com.example.sakuraanime;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 

@@ -2,7 +2,6 @@ package com.example.sakuraanime;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Anime implements Serializable {
     private String name;
