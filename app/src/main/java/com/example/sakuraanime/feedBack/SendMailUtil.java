@@ -1,6 +1,4 @@
 package com.example.sakuraanime.feedBack;
-import com.example.sakuraanime.MyApplication;
-import com.example.sakuraanime.ShareUtils;
 import androidx.annotation.NonNull;
 
 

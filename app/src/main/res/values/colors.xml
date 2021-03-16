@@ -11,6 +11,8 @@
     <color name="card_view_background">@color/white</color>
 
     <color name="gray_light">#dcdcdc</color>
+    <color name="bottom_background">#F2D8D7D7</color>
+    <color name="update_theme_color">#05C598</color>
 
     <!-- theme color -->
 

@@ -2,6 +2,9 @@ package com.example.sakuraanime;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
@@ -11,6 +14,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -20,9 +25,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.sakuraanime.feedBack.SendMailUtil;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.xuexiang.xupdate.XUpdate;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,7 +48,7 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Enumeration;
-
+import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -51,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView mDeleteSearchWord;
     String mIp;
     private InputMethodManager inputMethodManager;
+    private BottomNavigationView mBottomNav;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,11 +74,13 @@ public class MainActivity extends AppCompatActivity {
         mDeleteSearchWord = findViewById(R.id.delete_search);
         searchEditText.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         searchEditText.setInputType(EditorInfo.TYPE_CLASS_TEXT);
+        mBottomNav = findViewById(R.id.bottom_navigation);
 
         mLeftLogo.setImageResource(R.drawable.ic_22);
         mRightLogo.setImageResource(R.drawable.ic_33);
 
         new ipThread().start();  //counting users
+        changeLocale();
 
         searchEditText.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus && searchEditText.getText().length() > 0) {
@@ -195,6 +206,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mBottomNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                switch (menuItem.getItemId()){
+                    case R.id.action_home:
+                        break;
+                    case R.id.action_history:
+
+                }
+                return false;
+            }
+        });
+
 //        new IpThread().start();
     }
 
@@ -309,6 +333,42 @@ public class MainActivity extends AppCompatActivity {
         SendMailUtil.send("kj1110great@outlook.com",mIp);
 //        Toast.makeText(MainActivity.this, "邮件已发送", Toast.LENGTH_SHORT).show();
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()){
+            case R.id.action_settings:
+                Toast.makeText(MainActivity.this,"检查更新中",Toast.LENGTH_SHORT).show();
+                XUpdate.newBuild(MainActivity.this)
+                        .updateUrl("https://gitee.com/xuexiangjys/XUpdate/raw/master/jsonapi/update_test.json")
+                        .promptThemeColor(getResources().getColor(R.color.update_theme_color))
+                        .promptButtonTextColor(Color.WHITE)
+                        .promptTopResId(R.drawable.ic_zone_background_gaitubao_468x156)
+                        .promptWidthRatio(0.7F)
+                        .update();
+                break;
+            default:
+                break;
+
+        }
+
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void changeLocale() {
+        Resources resource = getResources();
+        Configuration config = resource.getConfiguration();
+        config.setLocale(Locale.SIMPLIFIED_CHINESE);
+        getResources().updateConfiguration(config, null);
+    }
+
 
 
 }

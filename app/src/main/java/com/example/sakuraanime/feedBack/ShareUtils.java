@@ -1,4 +1,4 @@
-package com.example.sakuraanime;
+package com.example.sakuraanime.feedBack;
 
 import android.content.Context;
 import android.content.SharedPreferences;

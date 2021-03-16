@@ -1,7 +1,5 @@
 package com.example.sakuraanime.feedBack;
 
-import com.example.sakuraanime.L;
-
 import java.io.File;
 import java.util.Date;
 import java.util.Properties;
