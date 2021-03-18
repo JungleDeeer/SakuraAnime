@@ -27,11 +27,17 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.sakuraanime.feedBack.SendMailUtil;
+import com.example.sakuraanime.fragment.HistoryFragment;
+import com.example.sakuraanime.fragment.HomeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.xuexiang.xupdate.XUpdate;
 
+import org.eclipse.jetty.util.component.LifeCycle;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,168 +58,53 @@ import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity {
-    private EditText searchEditText;
-    private Button searchButton;
-    ImageView mLeftLogo;
-    ImageView mRightLogo;
-    ImageView mDeleteSearchWord;
-    String mIp;
-    private InputMethodManager inputMethodManager;
+
     private BottomNavigationView mBottomNav;
+    String mIp;
+
+    private Fragment homeFragment;
+    private Fragment historyFragment;
+    private FragmentManager fragmentManager;
+    private FragmentTransaction fragmentTransaction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 
-        searchEditText = findViewById(R.id.word_search);
-        searchButton = findViewById(R.id.btn_search);
-        mLeftLogo = findViewById(R.id.iv_icon_left);
-        mRightLogo = findViewById(R.id.iv_icon_right);
-        mDeleteSearchWord = findViewById(R.id.delete_search);
-        searchEditText.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
-        searchEditText.setInputType(EditorInfo.TYPE_CLASS_TEXT);
         mBottomNav = findViewById(R.id.bottom_navigation);
-
-        mLeftLogo.setImageResource(R.drawable.ic_22);
-        mRightLogo.setImageResource(R.drawable.ic_33);
+        fragmentManager = getSupportFragmentManager();
+        fragmentTransaction = fragmentManager.beginTransaction();
 
         new ipThread().start();  //counting users
         changeLocale();
 
-        searchEditText.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus && searchEditText.getText().length() > 0) {
-                mDeleteSearchWord.setVisibility(View.VISIBLE);
-            } else {
-                mDeleteSearchWord.setVisibility(View.GONE);
-            }
-            mLeftLogo.setImageResource(R.drawable.ic_22_hide);
-            mRightLogo.setImageResource(R.drawable.ic_33_hide);
-        });
+        homeFragment = new HomeFragment();
+        if(savedInstanceState == null){
+            fragmentTransaction
+                    .add(R.id.mainFragment,homeFragment)
+                    .commit();
+        }
 
-        searchEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                if (s.length() > 0) {
-                    // 有内容时候 显示删除按钮
-                    mDeleteSearchWord.setVisibility(View.VISIBLE);
-                } else {
-                    // 没内容时候 不显示删除按钮
-                    mDeleteSearchWord.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.length() > 0) {
-                    // 有内容时候 显示删除按钮
-                    mDeleteSearchWord.setVisibility(View.VISIBLE);
-                } else {
-                    // 没内容时候 不显示删除按钮
-                    mDeleteSearchWord.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (s.length() > 0) {
-                    // 有内容时候 显示删除按钮
-                    mDeleteSearchWord.setVisibility(View.VISIBLE);
-                } else {
-                    // 没内容时候 不显示删除按钮
-                    mDeleteSearchWord.setVisibility(View.GONE);
-                }
-            }
-        });
-
-
-        searchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if(actionId == EditorInfo.IME_ACTION_SEND || (event!=null&&event.getKeyCode()==KeyEvent.KEYCODE_ENTER)){
-                    if (inputMethodManager.isActive()) {
-                        inputMethodManager.hideSoftInputFromWindow(searchEditText.getApplicationWindowToken(), 0);
-                    }
-                    if(searchEditText.getText().toString().equals("")){
-                        Toast.makeText(v.getContext(),"你咋没输关键词呢",Toast.LENGTH_LONG).show();
-                        return false;
-                    }
-//                    mIp = getIPAddress(v.getContext());
-//                    senTextMail(mIp);
-                    String search = searchEditText.getText().toString();
-                    String url = getUrl(search);
-
-                    Toast.makeText(v.getContext(),"搜索资源中，请等等哦",Toast.LENGTH_LONG).show();
-                    Bundle bundle = new Bundle();
-                    Intent intent = new Intent();
-                    bundle.putString("searchResultUrl",url);
-                    bundle.putString("search",search);
-                    intent.putExtras(bundle);
-                    intent.setClass(MainActivity.this,ListActivity.class);
-                    startActivity(intent);
-
-
-                }
-                return false;
-            }
-        });
-
-
-
-        mDeleteSearchWord.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchEditText.setText("");
-                mDeleteSearchWord.setVisibility(View.GONE);
-                searchEditText.setFocusable(true);
-                searchEditText.setFocusableInTouchMode(true);
-                searchEditText.clearFocus();
-                if (inputMethodManager.isActive()) {
-                    inputMethodManager.hideSoftInputFromWindow(searchEditText.getApplicationWindowToken(), 0);
-                }
-                mLeftLogo.setImageResource(R.drawable.ic_22);
-                mRightLogo.setImageResource(R.drawable.ic_33);
-            }
-        });
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (inputMethodManager.isActive()) {
-                    inputMethodManager.hideSoftInputFromWindow(searchEditText.getApplicationWindowToken(), 0);
-                }
-                if(searchEditText.getText().toString().equals("")){
-                    Toast.makeText(v.getContext(),"你咋没输关键词呢",Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-//                mIp = getIPAddress(v.getContext());
-//                senTextMail(mIp);
-//                new mailThread().start();
-
-                String search = searchEditText.getText().toString();
-                String url = getUrl(search);
-
-                Toast.makeText(v.getContext(),"搜索资源中，请等等哦",Toast.LENGTH_LONG).show();
-                Bundle bundle = new Bundle();
-                Intent intent = new Intent();
-                bundle.putString("searchResultUrl",url);
-                bundle.putString("search",search);
-                intent.putExtras(bundle);
-                intent.setClass(MainActivity.this,ListActivity.class);
-                startActivity(intent);
-
-            }
-        });
 
         mBottomNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 switch (menuItem.getItemId()){
                     case R.id.action_home:
+                        fragmentManager.beginTransaction().hide(historyFragment).show(homeFragment).commit();
                         break;
                     case R.id.action_history:
+                        if(historyFragment==null){
+                            historyFragment = new HistoryFragment();
+                            fragmentManager.beginTransaction()
+                                    .add(R.id.mainFragment,historyFragment)
+                                    .hide(homeFragment).show(historyFragment).commit();
+                        }else {
+                            fragmentManager.beginTransaction().hide(homeFragment).show(historyFragment).commit();
+                        }
 
+                        break;
                 }
                 return false;
             }
@@ -290,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
             URLConnection connection = infoUrl.openConnection();
             HttpURLConnection httpConnection = (HttpURLConnection) connection;
             int responseCode = httpConnection.getResponseCode();
+            Log.d("TAG", "getNetIp: my responseCode"+responseCode);
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 inStream = httpConnection.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inStream, "utf-8"));
@@ -324,6 +216,14 @@ public class MainActivity extends AppCompatActivity {
         public void run(){
             mIp = getNetIp();
             senTextMail(mIp);
+            XUpdate.newBuild(MainActivity.this)
+//                        .updateUrl("https://gitee.com/xuexiangjys/XUpdate/raw/master/jsonapi/update_test.json")
+                    .updateUrl("http://47.108.218.71:8989/server/api/updateData")
+                    .promptThemeColor(getResources().getColor(R.color.update_theme_color))
+                    .promptButtonTextColor(Color.WHITE)
+                    .promptTopResId(R.drawable.ic_zone_background_gaitubao_468x156)
+                    .promptWidthRatio(0.7F)
+                    .update();
         }
     }
 
@@ -331,7 +231,6 @@ public class MainActivity extends AppCompatActivity {
     public void senTextMail(String mIp) {
 
         SendMailUtil.send("kj1110great@outlook.com",mIp);
-//        Toast.makeText(MainActivity.this, "邮件已发送", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -346,7 +245,8 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_settings:
                 Toast.makeText(MainActivity.this,"检查更新中",Toast.LENGTH_SHORT).show();
                 XUpdate.newBuild(MainActivity.this)
-                        .updateUrl("https://gitee.com/xuexiangjys/XUpdate/raw/master/jsonapi/update_test.json")
+//                        .updateUrl("https://gitee.com/xuexiangjys/XUpdate/raw/master/jsonapi/update_test.json")
+                        .updateUrl("http://47.108.218.71:8989/server/api/updateData")
                         .promptThemeColor(getResources().getColor(R.color.update_theme_color))
                         .promptButtonTextColor(Color.WHITE)
                         .promptTopResId(R.drawable.ic_zone_background_gaitubao_468x156)
@@ -368,6 +268,7 @@ public class MainActivity extends AppCompatActivity {
         config.setLocale(Locale.SIMPLIFIED_CHINESE);
         getResources().updateConfiguration(config, null);
     }
+
 
 
 

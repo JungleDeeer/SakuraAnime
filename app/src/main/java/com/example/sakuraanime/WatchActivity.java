@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -14,10 +15,12 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.sakuraanime.database.DatabaseHelper;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.google.gson.Gson;
 
 import org.apache.commons.logging.LogFactory;
 import org.jsoup.Jsoup;
@@ -50,6 +53,8 @@ public class WatchActivity extends AppCompatActivity {
     private RecyclerView episodeListRecyclerView;
     private RecyclerView sourceRecyclerView;
     private androidx.appcompat.app.ActionBar actionBar;
+    private DatabaseHelper dbHelper;
+    private int historyLayoutPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,12 +62,16 @@ public class WatchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_watch);
 
 
+        dbHelper = new DatabaseHelper(this);
         jzvdStd = (JzvdStd) findViewById(R.id.jz_video);
 
         Bundle data = getIntent().getExtras();
         finalUrl = data.getString("finalUrl");
         title = data.getString("title");
         barTitle = data.getString("barTitle");
+        episodeList = (ArrayList<Episode>)getIntent().getSerializableExtra("EpisodeList");
+        Gson gson = new Gson();
+        String strEpisodeList = gson.toJson(episodeList);
 
         actionBar = getSupportActionBar();
         if(actionBar != null){
@@ -71,11 +80,16 @@ public class WatchActivity extends AppCompatActivity {
             actionBar.setTitle(barTitle);
         }
 
+
         jzvdStd.setUp(finalUrl, title, JzvdStd.SCREEN_NORMAL);
 
         jzvdStd.posterImageView.setImageResource(R.drawable.paimeng);
 
-        episodeList = (ArrayList<Episode>)getIntent().getSerializableExtra("EpisodeList");
+        if(dbHelper.updateHistory(barTitle,finalUrl,title)==(-1)){
+            dbHelper.insertHistory(finalUrl,title,barTitle,strEpisodeList);
+        }
+
+
         int playingSource = 0;
         episodeUrl= episodeList.get(playingSource).getEpisodeUrl();
         for(Map.Entry<String,String> entry : episodeUrl.entrySet()){
@@ -83,6 +97,9 @@ public class WatchActivity extends AppCompatActivity {
             episodePlayUrl.add(entry.getValue());
         }
 
+        if(episodeName.contains(title)){
+            historyLayoutPosition = episodeName.indexOf(title);
+        }
 
         sourceRecyclerView = findViewById(R.id.episode_source_recycler);
         LinearLayoutManager sourceLayoutManager = new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL, false);
@@ -99,7 +116,7 @@ public class WatchActivity extends AppCompatActivity {
             episodeListRecyclerView.setLayoutManager(episodeGridLayoutManager);
         }
 
-        episodeListAdapter = new EpisodeListAdapter(episodeName,episodePlayUrl,this);
+        episodeListAdapter = new EpisodeListAdapter(episodeName,episodePlayUrl, historyLayoutPosition,this);
         episodeListRecyclerView.setAdapter(episodeListAdapter);
 
 
@@ -128,6 +145,7 @@ public class WatchActivity extends AppCompatActivity {
                         finalUrl = newUrl;
                         jzvdStd.setUp(finalUrl, title, JzvdStd.SCREEN_NORMAL);
                         jzvdStd.posterImageView.setImageResource(R.drawable.paimeng);
+                        dbHelper.updateHistory(barTitle,finalUrl,title);
 
                         episodeUrl= episodeList.get(playingSource).getEpisodeUrl();
                         episodeName.clear();
@@ -157,13 +175,15 @@ public class WatchActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String newUrl = intent.getStringExtra("newUrl");
-            title = intent.getStringExtra("newTittle");
+            title = intent.getStringExtra("newTitle");
             if(newUrl.equals("")){
                 Toast.makeText(WatchActivity.this,"该集异常，请换源",Toast.LENGTH_LONG).show();
             }else {
                 finalUrl = newUrl;
                 jzvdStd.setUp(finalUrl, title, JzvdStd.SCREEN_NORMAL);
                 jzvdStd.posterImageView.setImageResource(R.drawable.paimeng);
+                dbHelper.updateHistory(barTitle,finalUrl,title);
+
                 Toast.makeText(WatchActivity.this,"换集成功",Toast.LENGTH_SHORT).show();
             }
         }
@@ -180,6 +200,9 @@ public class WatchActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Jzvd.releaseAllVideos();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(episodeMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(sourceMessageReceiver);
+        Log.d("TAG","my unregister 1");
     }
 
 
@@ -223,6 +246,9 @@ public class WatchActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+//                LocalBroadcastManager.getInstance(this).unregisterReceiver(episodeMessageReceiver);
+//                LocalBroadcastManager.getInstance(this).unregisterReceiver(sourceMessageReceiver);
+//                Log.d("TAG","my unregister 2");
                 this.finish(); // back button
                 return true;
         }

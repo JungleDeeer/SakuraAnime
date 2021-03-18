@@ -3,6 +3,7 @@ package com.example.sakuraanime;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +24,7 @@ public class EpisodeListAdapter extends RecyclerView.Adapter<EpisodeListAdapter.
     ArrayList<Episode> msourceList;
     private Context mContext;
     private Thread thread;
-    private int layoutPosition = 0;
+    private int layoutPosition;
     List<String> mEpisodeName;
     List<String> mEpisodePlayUrl;
     private int selectedPos = RecyclerView.NO_POSITION;
@@ -65,12 +66,12 @@ public class EpisodeListAdapter extends RecyclerView.Adapter<EpisodeListAdapter.
                             if(finalUrl == null||finalUrl.equals(""))
                             {
                                 intent.putExtra("newUrl","");
-                                intent.putExtra("newTittle",newTittle);
+                                intent.putExtra("newTitle",newTittle);
                                 LocalBroadcastManager.getInstance(view.getContext()).sendBroadcast(intent);
                             }
                             else{
                                 intent.putExtra("newUrl",finalUrl);
-                                intent.putExtra("newTittle",newTittle);
+                                intent.putExtra("newTitle",newTittle);
                                 LocalBroadcastManager.getInstance(view.getContext()).sendBroadcast(intent);
                             }
 
@@ -110,8 +111,10 @@ public class EpisodeListAdapter extends RecyclerView.Adapter<EpisodeListAdapter.
     @Override
     public int getItemCount(){return mEpisodePlayUrl.size();}
 
-    public EpisodeListAdapter(List<String> episodeName, List<String> episodePlayUrl, Context context){
+    public EpisodeListAdapter(List<String> episodeName, List<String> episodePlayUrl, int historyLayoutPosition, Context context){
         mEpisodeName = episodeName;
         mEpisodePlayUrl = episodePlayUrl;
-        mContext = context;}
+        mContext = context;
+        layoutPosition = historyLayoutPosition;
+    }
 }

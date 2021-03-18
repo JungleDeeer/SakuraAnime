@@ -14,6 +14,12 @@
     <color name="bottom_background">#F2D8D7D7</color>
     <color name="update_theme_color">#05C598</color>
 
+    <color name="colorDot">#00c6ae</color>
+    <color name="msg_no_notes">#999</color>
+    <color name="hint_enter_note">#89c3c3c3</color>
+    <color name="timestamp">#858585</color>
+    <color name="note_list_text">#232323</color>
+
     <!-- theme color -->
 
 </resources>
